@@ -2,8 +2,8 @@
 title: "Privilege Escalation"
 description: What is Privilege escalation ?
 date: 2025-01-20T20:26:44Z
-image: 
-math: img/cover.jpg
+image: img/cover.jpg
+math: 
 license: 
 hidden: false
 comments: true
