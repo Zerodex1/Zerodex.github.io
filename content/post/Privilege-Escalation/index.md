@@ -10,7 +10,7 @@ comments: true
 draft: true
 ---
 
-
+fd
   Privilege escalation.
 
 1-What's Privilege escalation ?
