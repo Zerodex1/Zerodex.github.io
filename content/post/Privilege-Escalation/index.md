@@ -42,7 +42,7 @@ or root user.
 assumes the identity of a different user (he/she does not gain any further
 privilege).
 
-## Table contents :
+## Table of contents :
 
 - Enumeration 
     - System and User Enum
