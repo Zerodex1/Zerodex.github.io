@@ -1,6 +1,6 @@
 ---
-title: Example Category
-description: A description of this category
+title: Pirivelege Escalation
+description: On this category we will discovery the Enumeration and the techniques of the Privilege Escalation on linux and Windows
 image:
 
 # Badge style
