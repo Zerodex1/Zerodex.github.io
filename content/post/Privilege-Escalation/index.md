@@ -33,6 +33,7 @@ to users with higher privileges.
 
 ## Types of Privilege escalation :
 Privilege escalation can be divided in two types: vertical and horizontal.
+
 ● Vertical: the attacker is able to move from a lower privileged user to a
 higher privileged user. For example from a low-end user to administrator
 or root user.
