@@ -11,12 +11,12 @@ draft: true
 ---
 
 
- # Privilege escalation 
+  Privilege escalation.
 
 1-What's Privilege escalation ?
 2-Types of Privilege escalation
 
- ## What's Privilege escalation :
+  What's Privilege escalation :
 
 ● Privilege escalation is a critical concept in penetration testing and red
 teaming.
@@ -27,12 +27,11 @@ higher-level user or administrator.
 misconfigurations to gain access to resources that are typically restricted
 to users with higher privileges.
 
-## Types of Privilege escalation :
+ Types of Privilege escalation :
 Privilege escalation can be divided in two types: vertical and horizontal.
 ● Vertical: the attacker is able to move from a lower privileged user to a
 higher privileged user. For example from a low-end user to administrator
 or root user.
 ● Horizontal: the attacker keeps the same set or level of privileges, but
 assumes the identity of a different user (he/she does not gain any further
-privilege).
-
+privilege)
