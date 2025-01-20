@@ -40,3 +40,30 @@ or root user.
 ● Horizontal: the attacker keeps the same set or level of privileges, but
 assumes the identity of a different user (he/she does not gain any further
 privilege).
+
+## Table contents :
+
+- Enumeration 
+    - System and User Enum
+	- Files Enum
+	- Network Enum
+	- Password Enum
+- Techniques
+-  Kernel Exploit
+- Sudo Attacks
+	- CVE-2019-14287
+	- CVE-2019-18634
+	- Shell Escaping
+	- LD-PRELOAD
+- SUID
+	- SUID Attacks
+	- Shared Object Injection
+	- Binary Symlinks
+	- Environment variables
+- Scheduled Tasks
+	- Scheduled Tasks
+	- Cron Jobs
+	- Cron wildcards
+	- Cron file overwrites
+- Capabilities Attacks
+- NFS Attack
