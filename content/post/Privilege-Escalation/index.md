@@ -2,7 +2,7 @@
 title: "Privilege Escalation"
 description: 
 date: 2025-01-20T21:11:19Z
-image: img/cover.jpg
+image: cover.jpg
 math: 
 license: 
 hidden: false
