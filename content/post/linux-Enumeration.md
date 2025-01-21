@@ -364,3 +364,30 @@ If you find a password or hash, try it across other accounts/services.
 ```shell
 su -c "<found_password>" <username>
 ```
+
+## Automation tools 
+
+**Automation tools help streamline the process of enumeration, vulnerability discovery, and privilege escalation by automating repetitive tasks and identifying potential weaknesses efficiently. In my opinion, mastering the process manually is preferable.**
+
+1. **LinPEAS**
+
+**LinPEAS** (Linux Privilege Escalation Awesome Script) is a powerful script designed to enumerate a Linux system for privilege escalation vectors and misconfigurations.
+ • Download Source: LinPEAS GitHub Repository [LinPeas](https://github.com/peass-ng/PEASS-ng)
+ 
+ 1. **Linux Exploit Suggester**
+This tool identifies potential privilege escalation vulnerabilities based on the system’s kernel version and configuration.
+ • Download Source: **Linux Exploit Suggester** GitHub Repository [Linux Exploit Suggester](https://github.com/The-Z-Labs/linux-exploit-suggester)
+ 
+ 3. **LinEnum**
+ 
+**LinEnum** is a lightweight script that performs comprehensive enumeration of a Linux system, including user details, file permissions, and potential privilege escalation paths.
+ • Download Source: LinEnum GitHub Repository  [LinEnum](https://github.com/rebootuser/LinEnum)
+
+ 4. **Pspy**
+ 
+**Pspy** is a process monitoring tool that allows you to watch processes executed on a Linux system without needing elevated privileges.
+ • Download Source: pspy GitHub Repository [Pspy](https://github.com/DominicBreuker/pspy)
+
+
+ **Conclusion**
+In this article, I’ve shared key aspects of enumeration to help us master privilege escalation, from system and user insights to files, networks, and passwords. While tools can assist, I believe manual expertise is crucial. Thanks for reading, and happy learning!
