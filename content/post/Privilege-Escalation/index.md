@@ -9,7 +9,7 @@ hidden: false
 comments: true
 draft: false
 tags: ["Privesc"]
-category : "Linux-Privilege-Escalation"
+categories: [Linux-Privilege-Escalation]
 ---
 
 
