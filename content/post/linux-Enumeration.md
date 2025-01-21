@@ -16,7 +16,7 @@ categories: [Linux-Privilege-Escalation]
 
 In this article I will share with you some techniques for enumerate linux systenm 
 
-tables of content :
+Table of contents :
 
 
 	- System and User Enumeration
@@ -34,34 +34,34 @@ System and user enumeration involves gathering information about the operating s
 - `uname`: The `uname` command, when used with the `-a` option, displays detailed information about the Linux kernel:
 
 ```bash
-$ uname -a
+ uname -a
 ```
 
 - `cat /etc/os-release`: This command displays information about the target system’s distribution and version:
 
 ```bash
-$ cat /etc/os-release
+ cat /etc/os-release
 ```
 
 - `cat /proc/version`: This command displays more detailed information about the Linux kernel, including the compiler used to build it:
 
 ```bash
-$ cat /proc/version
+ cat /proc/version
 ```
 
 Current User and Group:
 
 ```bash
-$ whoami
-$ id
-$ groups
+ whoami
+ id
+ groups
 ```
 
 Logged-in Users:
 
 ```shell
-$ w
-$ last
+ w
+ last
 ```
 
 System Users:
