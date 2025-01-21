@@ -2,7 +2,7 @@
 title: "Linux Enumeration"
 description: 
 date: 2025-01-21T14:22:34Z
-image: lcover.jpg
+image: img/lcover.jpg
 math: 
 license: 
 hidden: false
