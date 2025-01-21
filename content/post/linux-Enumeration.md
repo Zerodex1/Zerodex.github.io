@@ -2,7 +2,7 @@
 title: "Linux Enumeration"
 description: 
 date: 2025-01-21T14:22:34Z
-image: 
+image: lcoffe.mp4 
 math: 
 license: 
 hidden: false
