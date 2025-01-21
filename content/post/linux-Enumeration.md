@@ -28,7 +28,7 @@ Table of contents :
 
 ## System and User Enumeration
 
-System and user enumeration involves gathering information about the operating system, users, groups, and privileges to identify potential weaknesses for privilege escalation.
+#### System and user enumeration involves gathering information about the operating system, users, groups, and privileges to identify potential weaknesses for privilege escalation.
 
 
 - `uname`: The `uname` command, when used with the `-a` option, displays detailed information about the Linux kernel:
