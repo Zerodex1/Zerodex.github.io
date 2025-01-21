@@ -2,7 +2,11 @@
 title: "Linux Enumeration"
 description: 
 date: 2025-01-21T14:22:34Z
-image: lpc.jpg
+cover:
+  image: lpc.jpg
+  hidden: false
+  hiddenInList: false
+  hiddenInSingle: false
 math: 
 license: 
 hidden: false
