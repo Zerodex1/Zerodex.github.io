@@ -372,21 +372,28 @@ su -c "<found_password>" <username>
 1. **LinPEAS**
 
 **LinPEAS** (Linux Privilege Escalation Awesome Script) is a powerful script designed to enumerate a Linux system for privilege escalation vectors and misconfigurations.
+
  • Download Source: LinPEAS GitHub Repository [LinPeas](https://github.com/peass-ng/PEASS-ng)
  
- 1. **Linux Exploit Suggester**
+2. **Linux Exploit Suggester**
+
 This tool identifies potential privilege escalation vulnerabilities based on the system’s kernel version and configuration.
+
  • Download Source: **Linux Exploit Suggester** GitHub Repository [Linux Exploit Suggester](https://github.com/The-Z-Labs/linux-exploit-suggester)
  
- 3. **LinEnum**
+3. **LinEnum**
  
 **LinEnum** is a lightweight script that performs comprehensive enumeration of a Linux system, including user details, file permissions, and potential privilege escalation paths.
+
  • Download Source: LinEnum GitHub Repository  [LinEnum](https://github.com/rebootuser/LinEnum)
 
- 4. **Pspy**
+4. **Pspy**
  
 **Pspy** is a process monitoring tool that allows you to watch processes executed on a Linux system without needing elevated privileges.
+
  • Download Source: pspy GitHub Repository [Pspy](https://github.com/DominicBreuker/pspy)
+ 
+
 
 
  **Conclusion**
