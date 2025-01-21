@@ -8,7 +8,7 @@ license:
 hidden: false
 comments: true
 draft: false
-tags: ["Privesc","Enumeration"]
+tags: ["Privesc","Enumeration","Linux"]
 categories: [Linux-Privilege-Escalation]
 ---
 
