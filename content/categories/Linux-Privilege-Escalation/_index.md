@@ -1,5 +1,5 @@
 ---
-title: Pirivelege Escalation
+title: Linux Pirivelege Escalation
 description: On this category we will discovery the Enumeration and the techniques of the Privilege Escalation on linux and Windows
 image:
 
