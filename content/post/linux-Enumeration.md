@@ -2,7 +2,7 @@
 title: "Linux Enumeration"
 description: 
 date: 2025-01-21T14:22:34Z
-image: /workspaces/Zerodex.github.io/assets/img/lcover.jpg
+image: lpc.jpg
 math: 
 license: 
 hidden: false
