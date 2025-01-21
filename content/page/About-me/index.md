@@ -1,5 +1,7 @@
 ---
 title: About me
+date: 2025-01-21
+type: "page"
 
 comments: false
 ---
