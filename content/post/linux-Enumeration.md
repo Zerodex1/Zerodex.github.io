@@ -14,7 +14,7 @@ categories: [Linux-Privilege-Escalation]
 
 # linux Enumeration For Privilege esclation
 
-In this article I will share with you some techniques for enumerate linux systenm 
+**In this article I will share with you some techniques for enumerate linux system.**
 
 Table of contents :
 
