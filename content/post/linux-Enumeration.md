@@ -2,7 +2,7 @@
 title: "Linux Enumeration"
 description: 
 date: 2025-01-21T14:22:34Z
-image: post/lpc.jpg
+image: post/moon.jpg
 math: 
 license: 
 hidden: false
