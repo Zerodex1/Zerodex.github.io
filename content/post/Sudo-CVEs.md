@@ -2,7 +2,7 @@
 title: "Sudo CVEs"
 description: 
 date: 2025-01-23T14:14:48Z
-image: post/cvessudo.jpg
+image: post/cvesudo.jpg
 math: 
 license: 
 hidden: false
