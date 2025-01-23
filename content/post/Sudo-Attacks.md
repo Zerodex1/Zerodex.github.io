@@ -9,7 +9,7 @@ hidden: false
 comments: true
 draft: false
 tags: ["Privesc","kernel","Linux","Sudo"]
-categories: [Linux-Privilege-Escalation]
+categories: ["Linux-Privilege-Escalation","Sudo-Attacks"] 
 ---
 
 # Introduction to Sudo Attacks and Privilege Escalation on Linux
