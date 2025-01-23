@@ -117,7 +117,7 @@ And just like that, we are now the root user! :
 
 - [MITRE CVE Details](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-14287)
 
-# **CVE-2019-18634**
+## **CVE-2019-18634**
 
 CVE-2019-18634 is a **buffer overflow vulnerability** in `sudo` that can allow local privilege escalation. It specifically affects `sudo` configurations where **pwfeedback** is enabled, which can result in memory corruption and potentially lead to unauthorized code execution or system crashes.
 
