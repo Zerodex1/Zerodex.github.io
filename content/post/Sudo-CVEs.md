@@ -116,3 +116,116 @@ And just like that, we are now the root user! :
 ### **References**
 
 - [MITRE CVE Details](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-14287)
+
+# **CVE-2019-18634**
+
+CVE-2019-18634 is a **buffer overflow vulnerability** in `sudo` that can allow local privilege escalation. It specifically affects `sudo` configurations where **pwfeedback** is enabled, which can result in memory corruption and potentially lead to unauthorized code execution or system crashes.
+
+---
+
+## **Details of the Vulnerability**
+
+1. **Affected Software**:
+    
+    - `sudo` versions prior to **1.8.31**.
+    - Only configurations with **pwfeedback** enabled are affected.
+2. **Vulnerability Description**:
+    
+    - The **pwfeedback** option, which provides visual feedback when typing a password (e.g., asterisks), is susceptible to a buffer overflow.
+    - If the input exceeds the buffer size, it overflows, corrupting memory.
+    - The issue is exploitable only when the attacker provides their own password input, making it a local attack vector.
+3. **Exploitation**:
+    
+    - By triggering the buffer overflow, an attacker can potentially execute arbitrary code or crash the `sudo` process.
+
+---
+
+## **Proof of Concept (PoC)**
+
+### 1. Vulnerable Configuration:
+
+The `/etc/sudoers` file must have **pwfeedback** enabled:
+
+```plaintext
+Defaults pwfeedback
+```
+
+### 2. Exploit Steps:
+
+- Use a specially crafted input (e.g., very long password) to overflow the buffer.
+- For example:
+    
+    ```bash
+    python3 -c "print('A' * 10000)" | sudo -S id
+    ```
+    
+- This may result in a segmentation fault or allow further exploitation.
+
+### 3. Output:
+
+If the system is vulnerable, it could crash with a segmentation fault:
+
+```plaintext
+Segmentation fault (core dumped)
+```
+
+---
+
+## **Impact**
+
+- **Privilege Escalation**: Potential execution of arbitrary code with root privileges.
+- **Denial of Service**: Crash or instability of the `sudo` process.
+- **Severity**: High (CVSS Score: 7.8).
+
+---
+
+## **Mitigation**
+
+1. **Update `sudo`**:
+    
+    - Upgrade to `sudo` version **1.8.31** or later, where the issue is patched:
+        
+        ```bash
+        sudo apt update && sudo apt install sudo
+        ```
+        
+2. **Disable pwfeedback**:
+    
+    - Ensure the `pwfeedback` option is not enabled in `/etc/sudoers`:
+        
+        ```plaintext
+        Defaults !pwfeedback
+        ```
+        
+3. **Apply Principle of Least Privilege**:
+    
+    - Limit sudo access to necessary users and monitor suspicious activity.
+
+---
+
+## **Detection**
+
+1. **Check sudo Version**:
+    
+    ```bash
+    sudo --version
+    ```
+    
+2. **Search for pwfeedback in sudoers**:
+    
+    ```bash
+    sudo grep pwfeedback /etc/sudoers /etc/sudoers.d/*
+    ```
+    
+
+---
+
+## Labs : 
+
+- https://tryhackme.com/r/room/sudovulnsbof
+
+## **References**
+
+- [Sudo Security Advisory](https://www.sudo.ws/alerts/pwfeedback.html)
+- [MITRE CVE Details](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18634)
+
