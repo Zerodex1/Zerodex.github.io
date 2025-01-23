@@ -2,7 +2,7 @@
 title: "Sudo Attacks"
 description: 
 date: 2025-01-23T13:48:02Z
-image: 
+image: /post/sudo.jpg
 math: 
 license: 
 hidden: false
