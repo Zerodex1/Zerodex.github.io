@@ -108,7 +108,7 @@ After running `sudo -l`, we see that we can run `/bin/bash` as another user exce
 sudo -u#-1 /bin/bash
 ```
 
-![image alt text](/my_image.png)
+![image alt text](post/cvs2.png)
 
 
 And just like that, we are now the root user! :
