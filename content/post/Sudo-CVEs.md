@@ -93,6 +93,24 @@ uid=0(root) gid=0(root) groups=0(root)
 
 - https://tryhackme.com/r/room/sudovulnsbypass
 
+#### TryHackMe Lab 
+
+Now that we have access to the machine, our next goal is to gain root privileges using the identified vulnerability.
+
+First, we use the command `sudo -l` to check what commands we can execute with the current user.
+
+![[Pasted image 20250113172749.png]]
+
+After running `sudo -l`, we see that we can run `/bin/bash` as another user except for root. Let’s exploit this vulnerability.
+
+```shell
+sudo -u#-1 /bin/bash
+```
+
+![[Pasted image 20250113173233.png]]
+
+And just like that, we are now the root user! :
+
 ### **References**
 
 - [MITRE CVE Details](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-14287)
