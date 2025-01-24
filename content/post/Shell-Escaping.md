@@ -26,7 +26,7 @@ To gain higher privileges using `sudo`, follow these steps:
     sudo -l
     ```
 
-  ![image alt text](post/sudo-l.png)
+  ![image alt text](post/sudo.png)
 
     As seen in the image, there are some tools and services that can be run as `sudo`. To make exploitation easier, we can visit this site: [GTFOBins](https://gtfobins.github.io/).
 
