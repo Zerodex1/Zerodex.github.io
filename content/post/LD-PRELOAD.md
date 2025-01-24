@@ -7,7 +7,9 @@ math:
 license: 
 hidden: false
 comments: true
-draft: true
+draft: false
+tags: ["Privesc","Linux","Sudo"]
+categories: ["Linux-Privilege-Escalation","Sudo-Attacks"] 
 ---
 
 
