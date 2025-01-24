@@ -2,7 +2,7 @@
 title: "Shell Escaping"
 description: 
 date: 2025-01-24T12:38:00Z
-image: 
+image: post/sudo-lc.jpg
 math: 
 license: 
 hidden: false
