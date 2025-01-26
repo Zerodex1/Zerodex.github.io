@@ -61,7 +61,6 @@ categories: ["Linux-Privilege-Escalation","SUID-Attacks"]
     
     ```bash
     export LD_LIBRARY_PATH=/tmp/malicious:$LD_LIBRARY_PATH
-    sudo some-command
     ```
     
 
