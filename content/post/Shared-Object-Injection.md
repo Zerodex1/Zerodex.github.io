@@ -2,12 +2,14 @@
 title: "Shared Object Injection"
 description: 
 date: 2025-01-26T13:50:55Z
-image: 
+image: /post/suid.jpg
 math: 
 license: 
 hidden: false
 comments: true
 draft: false
+tags: ["Privesc","Linux","SUID"]
+categories: ["Linux-Privilege-Escalation","SUID-Attacks"]
 ---
 
 ### **Shared Object Injection for Privilege Escalation**
