@@ -2,7 +2,7 @@
 title: "Shared Object Injection"
 description: 
 date: 2025-01-26T13:50:55Z
-image: /post/suid.jpg
+image: post/suid.jpg
 math: 
 license: 
 hidden: false
