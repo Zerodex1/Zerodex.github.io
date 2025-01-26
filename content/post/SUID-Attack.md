@@ -2,7 +2,7 @@
 title: "SUID Attacks"
 description: 
 date: 2025-01-26T12:47:23Z
-image: 
+image: /post/coversuid.jpg
 math: 
 license: 
 hidden: false
@@ -12,7 +12,7 @@ tags: ["Privesc","Linux","SUID"]
 categories: ["Linux-Privilege-Escalation","SUID-Attacks"] 
 ---
 
-# What is SUID bit set?
+# What is SUID?
 
 **Definition:** SUID (Set owner User ID up on execution) is a special permission that allows other users run with the owner’s privileges. That’s why SUID files can be exploited to give adversaries the higher privilege in Linux/Unix system called privilege escalation. Mostly, **root** access is the goal of hackers when performing privilege escalation.
 
