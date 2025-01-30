@@ -2,12 +2,14 @@
 title: "Binary Symlinks"
 description: 
 date: 2025-01-30T17:41:45Z
-image: 
+image: post/binary.jpg
 math: 
 license: 
 hidden: false
 comments: true
 draft: false
+tags: ["Privesc","Linux","SUID"]
+categories: ["Linux-Privilege-Escalation","SUID-Attacks"]
 ---
 
 ### **Binary Symlink Privilege Escalation**
